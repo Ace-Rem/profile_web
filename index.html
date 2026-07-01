@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio Cá Nhân</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="theme-background" aria-hidden="true"></div>
+  
+  <header class="site-header">
+    <a class="logo" href="#" aria-label="Portfolio" id="logo-container"></a>
+    <nav class="header-menu" aria-label="Điều hướng chính"></nav>
+  </header>
+
+  <main class="layout">
+    <aside class="navigation-panel" aria-label="Điều hướng vòng tròn">
+      <div class="circle-wrap">
+        <svg class="circle-navigation" viewBox="0 0 220 220" role="img" aria-label="Điều hướng theo trang"></svg>
+        <div class="circle-center">
+          <span class="circle-index">01</span>
+          <span class="circle-label" id="circle-label-text"></span>
+        </div>
+      </div>
+    </aside>
+
+    <section class="carousel-section" aria-label="Nội dung chính">
+      <div class="carousel-shell">
+        <div class="carousel-track"></div>
+      </div>
+      <div class="carousel-indicators" aria-label="Chọn trang"></div>
+    </section>
+
+    <aside class="profile-card" aria-label="Giới thiệu cá nhân"></aside>
+  </main>
+
+  <button class="theme-toggle" type="button" aria-label="Chuyển giao diện tối">
+    <span class="theme-icon theme-moon" aria-hidden="true">☾</span>
+    <span class="theme-icon theme-sun" aria-hidden="true">☼</span>
+  </button>
+  <div class="copy-tooltip" role="status" aria-live="polite">Đã sao chép</div>
+
+  <script src="script.js"></script>
+</body>
+</html>
