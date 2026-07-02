@@ -79,6 +79,9 @@ button {
   background-repeat: no-repeat;
   opacity: 0;
   z-index: 0;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   transition: opacity 0.5s ease-in-out;
 }
 
@@ -161,7 +164,7 @@ button {
   color: var(--muted);
   background: transparent;
   cursor: pointer;
-  transition: background-color var(--transition), color var(--transition), transform var(--transition), box-shadow var(--transition);
+  transition: background-color var(--transition), color var(--transition), transform var(--transition);
 }
 
 .menu-button:hover {
@@ -194,6 +197,7 @@ button {
   position: relative;
   width: 122px;
   aspect-ratio: 1;
+  contain: layout paint;
 }
 
 .circle-navigation {
@@ -250,6 +254,7 @@ button {
 
 .carousel-section {
   min-width: 0;
+  contain: layout style;
 }
 
 .carousel-shell {
@@ -257,18 +262,7 @@ button {
   padding: 6px 0 14px;
   touch-action: pan-y;
   cursor: grab;
-}
-
-.carousel-shell.dragging {
-  cursor: grabbing;
-}
-
-.carousel-shell {
-  overflow: hidden;
-  padding: 6px 0 14px;
-  /* Ép trình duyệt: Chỉ tự cuộn dọc, vuốt ngang để JS tự lo */
-  touch-action: pan-y; 
-  cursor: grab;
+  isolation: isolate;
 }
 
 .carousel-shell.dragging {
@@ -288,6 +282,7 @@ button {
 .carousel-track {
   position: relative;
   height: clamp(350px, calc(var(--available-height) - 72px), 430px);
+  contain: layout style;
 }
 
 .page-card {
@@ -310,6 +305,13 @@ button {
   transform: translate3d(calc(-50% + 136%), 0, 0) scale(0.8);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  contain: layout paint;
+  transition: transform var(--transition);
+}
+
+.page-card[data-pos="-1"],
+.page-card[data-pos="0"],
+.page-card[data-pos="1"] {
   transition: transform var(--transition), opacity var(--transition);
 }
 
@@ -446,9 +448,7 @@ button {
   color: var(--white);
   background: var(--active-color);
   box-shadow: 0 12px 24px color-mix(in srgb, var(--active-color) 22%, transparent);
-  transition: transform var(--transition), background-color var(--transition), box-shadow var(--transition);
-  will-change: transform, opacity;
-  contain: layout paint;
+  transition: transform var(--transition), background-color var(--transition);
 }
 
 .primary-button {
@@ -719,17 +719,19 @@ button {
 }
 
 .indicator-dot {
-  width: 9px;
+  width: 30px;
   height: 9px;
   border: 0;
   border-radius: 999px;
   background: color-mix(in srgb, var(--muted) 34%, transparent);
   cursor: pointer;
-  transition: width var(--transition), background-color var(--transition), transform var(--transition);
+  transform: scaleX(0.3);
+  transform-origin: center;
+  transition: transform var(--transition), background-color var(--transition);
 }
 
 .indicator-dot.active {
-  width: 30px;
+  transform: scaleX(1);
   background: var(--active-color);
 }
 
@@ -905,6 +907,33 @@ button {
 .dark-mode .theme-sun {
   opacity: 1;
   transform: rotate(0) scale(1);
+}
+
+.no-transition,
+.no-transition *,
+.no-transition *::before,
+.no-transition *::after {
+  transition: none !important;
+}
+
+html.is-page-changing :where(
+  .logo-mark,
+  .menu-button,
+  .circle-index,
+  .circle-label,
+  .circle-segment,
+  .card-kicker,
+  .eyebrow,
+  .indicator-dot,
+  .info-icon,
+  .contact-icon,
+  .project-icon,
+  .tech-list span,
+  .skill-tags span,
+  .page-card p,
+  .profile-description
+) {
+  transition: none !important;
 }
 
 @media (max-width: 1180px) {

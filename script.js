@@ -3,31 +3,31 @@
 // ==========================================
 const portfolioData = {
   profile: {
-    name: "Thể Văn Lộc (Ace Rem)", // [cite: 1]
-    role: "", // [cite: 2]
+    name: "Thể Văn Lộc (Ace Rem)",
+    role: "",
     avatar: "L",
     description: "Mong muốn phát triển tại các vị trí nhân viên văn phòng, mong muốn được học hỏi, rèn luyện kỹ năng tư vấn, làm việc với dữ liệu. Luôn làm việc với tinh thần trách nhiệm, khả năng tiếp thu nhanh và sự kiên trì.",
     objective: "Đóng góp vào việc gia tăng doanh số, tối ưu hóa hệ thống và phát triển lâu dài cùng doanh nghiệp.",
-    skills: ["Java/C++/Python", "SQL & Git", "Windows/Linux", "Bộ công cụ văn phòng", "Android system"], 
+    skills: ["Java/C++/Python", "SQL & Git", "Windows/Linux", "Bộ công cụ văn phòng", "Android system"],
     cvLink: "assets/cv.pdf"
   },
   contacts: {
-    email: "aceloc2003@gmail.com", // [cite: 5]
+    email: "aceloc2003@gmail.com",
     github: "https://github.com/Ace-Rem",
     githubLabel: "github.com/Ace-Rem",
     facebook: "https://www.facebook.com/rem.ace.54",
     facebookLabel: "facebook.com/Ace",
     zalo: "https://zalo.me/0375964170",
-    phone: "0375964170", // [cite: 3]
+    phone: "0375964170",
     phoneLabel: "0375964170",
-    address: "Phố Hữu Nghị, Phường Tùng Thiện, Hà Nội" // [cite: 6]
+    address: "Phố Hữu Nghị, Phường Tùng Thiện, Hà Nội"
   },
   personalInfo: [
-    { icon: "◉", label: "Họ và tên", value: "Thể Văn Lộc" }, // [cite: 1]
-    { icon: "◌", label: "Ngày sinh", value: "20/04/2003" }, // [cite: 4]
-    { icon: "⌂", label: "Địa chỉ", value: "Tùng Thiện, Hà Nội" }, // [cite: 6]
-    { icon: "✦", label: "Ngành học", value: "Công nghệ thông tin" }, // [cite: 8]
-    { icon: "▣", label: "Trường học", value: "Đại học Công Nghiệp Việt - Hung" } // [cite: 11]
+    { icon: "◉", label: "Họ và tên", value: "Thể Văn Lộc" },
+    { icon: "◌", label: "Ngày sinh", value: "20/04/2003" },
+    { icon: "⌂", label: "Địa chỉ", value: "Tùng Thiện, Hà Nội" },
+    { icon: "✦", label: "Ngành học", value: "Công nghệ thông tin" },
+    { icon: "▣", label: "Trường học", value: "Đại học Công Nghiệp Việt - Hung" }
   ],
   projects: [
     {
@@ -36,7 +36,7 @@ const portfolioData = {
       time: "01/2026 - 04/2026",
       desc: "Lên ý tưởng, hỗ trợ xây dựng chức năng web/mobile và theo dõi luồng API/Dữ liệu.",
       tech: ["AI Integration", "API", "Testing"],
-      github: "https://github.com/Ace-Rem/QLCV-AI-APK/releases" // Đã thay link QLCV
+      github: "https://github.com/Ace-Rem/QLCV-AI-APK/releases"
     },
     {
       icon: "◈",
@@ -44,7 +44,7 @@ const portfolioData = {
       time: "02/2025 - 05/2025",
       desc: "Hỗ trợ xây dựng, kiểm tra chức năng đăng nhập, tìm kiếm và làm quen quản lý dữ liệu backend.",
       tech: ["Web System", "Backend Data"],
-      github: "https://github.com/Ace-Rem" // Bạn có thể thay link cụ thể sau nếu muốn
+      github: "https://github.com/Ace-Rem"
     },
     {
       icon: "💻",
@@ -52,7 +52,7 @@ const portfolioData = {
       time: "02/2024 - 05/2024",
       desc: "Thực hành xây dựng website cơ bản, kiểm tra chức năng và xử lý dữ liệu.",
       tech: ["E-commerce", "Data Processing"],
-      github: "https://github.com/Ace-Rem" // Bạn có thể thay link cụ thể sau nếu muốn
+      github: "https://github.com/Ace-Rem"
     },
     {
       icon: "🎵",
@@ -60,12 +60,12 @@ const portfolioData = {
       time: "04/2025 - 07/2025",
       desc: "Xây dựng chức năng phát nhạc, tìm hiểu xử lý media và kiểm tra UX.",
       tech: ["Mobile App", "Media Processing"],
-      github: "https://github.com/Ace-Rem/MPAR-app/releases" // Đã thay link Play Music
+      github: "https://github.com/Ace-Rem/MPAR-app/releases"
     }
   ],
   resume: {
     education: "Cử nhân chuyên ngành Công nghệ thông tin (2022 - 2026).",
-      skillsDesc: [
+    skillsDesc: [
       "Hiểu cơ bản về lập trình (Java, C++, Python), kiến thức OOP, luồng hệ thống và frontend/backend.",
       "Sử dụng công cụ & CSDL cơ bản: SQL, Git/GitHub, Linux, Windows Forms, ASP.NET Web.",
       "Cài đặt, tối ưu HĐH máy tính; hiểu biết Android system và xử lý lỗi thiết bị/phần mềm cơ bản.",
@@ -100,19 +100,35 @@ const siteHeader = document.querySelector(".site-header");
 const themeBackground = document.querySelector(".theme-background");
 
 const PAGE_COUNT = portfolioData.pages.length;
+const HALF_PAGE = PAGE_COUNT / 2;
 const circleIndexLabels = portfolioData.pages.map((_, i) => String(i + 1).padStart(2, "0"));
+const pageTitles = portfolioData.pages.map((page) => page.title);
+const pageColors = portfolioData.pages.map((page) => page.color);
 const cardPosCache = new Array(PAGE_COUNT);
+
+const POS_MATRIX = [];
+for (let active = 0; active < PAGE_COUNT; active++) {
+  const row = new Array(PAGE_COUNT);
+  for (let card = 0; card < PAGE_COUNT; card++) {
+    let offset = card - active;
+    if (offset > HALF_PAGE) offset -= PAGE_COUNT;
+    if (offset < -HALF_PAGE) offset += PAGE_COUNT;
+    row[card] = offset === 0 ? "0" : String(offset);
+  }
+  POS_MATRIX[active] = row;
+}
 
 let activeIndex = -1;
 let dragStartX = 0;
 let dragCurrentX = 0;
 let isDragging = false;
-let wasDragged = false; // Biến cờ để phân biệt vuốt và click
-let tooltipTimer;
-let resizeTimer;
+let wasDragged = false;
+let tooltipTimer = 0;
+let layoutRafId = 0;
 let transitionTimer = 0;
 let pageRafId = 0;
 let pendingPageIndex = 0;
+let pendingTransitionEnds = 0;
 
 let pageCards;
 let menuButtons;
@@ -158,20 +174,20 @@ function renderProfile() {
 }
 
 function renderMenu() {
-  menu.innerHTML = portfolioData.pages.map((page, index) => 
+  menu.innerHTML = portfolioData.pages.map((page, index) =>
     `<button class="menu-button" type="button" data-index="${index}">${page.title}</button>`
   ).join("");
 }
 
 function renderIndicators() {
-  indicators.innerHTML = portfolioData.pages.map((page, index) => 
+  indicators.innerHTML = portfolioData.pages.map((page, index) =>
     `<button class="indicator-dot" type="button" data-index="${index}" aria-label="Chuyển đến ${page.title}"></button>`
   ).join("");
 }
 
 function renderCircle() {
   const gap = 3;
-  const step = 360 / portfolioData.pages.length;
+  const step = 360 / PAGE_COUNT;
   circle.innerHTML = portfolioData.pages.map((page, index) => {
     const start = index * step + gap / 2;
     const end = (index + 1) * step - gap / 2;
@@ -191,7 +207,7 @@ function renderPages() {
         </section>
       `).join("");
       content = `<div class="personal-info-list">${infoHtml}</div>`;
-    } 
+    }
     else if (page.id === "projects") {
       const projectsHtml = portfolioData.projects.map(proj => `
         <section class="project-item">
@@ -210,7 +226,7 @@ function renderPages() {
     }
     else if (page.id === "profile") {
       const skillsHtml = portfolioData.resume.skillsDesc.map(s => `<li>${s}</li>`).join("");
-      
+
       content = `
         <div class="resume-grid compact-grid" style="grid-template-columns: 1fr 1.5fr;">
           <section class="resume-box">
@@ -224,7 +240,7 @@ function renderPages() {
         </div>
         <a class="primary-button" href="${portfolioData.profile.cvLink}" download>Tải CV</a>
       `;
-    } 
+    }
     else if (page.id === "contact") {
       content = `
         <div class="contact-grid">
@@ -270,17 +286,20 @@ function renderPages() {
 }
 
 function renderBackgrounds() {
-  themeBackground.innerHTML = portfolioData.pages.map((page, index) => 
-    `<div class="bg-layer" data-index="${index}" style="background-image: url('${page.bgImage}')"></div>`
+  themeBackground.innerHTML = portfolioData.pages.map((page, index) =>
+    `<div class="bg-layer" data-index="${index}" style="background-image:url('${page.bgImage}')"></div>`
   ).join("");
 }
 
 // ==========================================
-// 4. CORE LOGIC & SỰ KIỆN CẢI TIẾN
+// 4. CORE LOGIC & SỰ KIỆN
 // ==========================================
 function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
   const angleInRadians = (angleInDegrees - 90) * Math.PI / 180;
-  return { x: centerX + radius * Math.cos(angleInRadians), y: centerY + radius * Math.sin(angleInRadians) };
+  return {
+    x: centerX + radius * Math.cos(angleInRadians),
+    y: centerY + radius * Math.sin(angleInRadians)
+  };
 }
 
 function describeArc(startAngle, endAngle) {
@@ -301,11 +320,23 @@ function describeArc(startAngle, endAngle) {
   ].join(" ");
 }
 
+function applyLayoutMetrics(headerBottom) {
+  const headerOffset = Math.ceil(headerBottom + 20);
+  const availableHeight = Math.max(window.innerHeight - headerOffset, 360);
+  root.style.setProperty("--header-offset", headerOffset + "px");
+  root.style.setProperty("--available-height", availableHeight + "px");
+}
+
 function updateLayoutMetrics() {
-  const headerRect = siteHeader.getBoundingClientRect();
-  const headerOffset = Math.ceil(headerRect.bottom + 20);
-  root.style.setProperty("--header-offset", `${headerOffset}px`);
-  root.style.setProperty("--available-height", `${Math.max(window.innerHeight - headerOffset, 360)}px`);
+  applyLayoutMetrics(siteHeader.getBoundingClientRect().bottom);
+}
+
+function scheduleLayoutMetrics() {
+  if (layoutRafId) return;
+  layoutRafId = requestAnimationFrame(() => {
+    layoutRafId = 0;
+    updateLayoutMetrics();
+  });
 }
 
 function cacheCarouselDom() {
@@ -317,20 +348,45 @@ function cacheCarouselDom() {
   for (let i = 0; i < PAGE_COUNT; i++) cardPosCache[i] = null;
 }
 
-function getCardPosKey(cardIndex) {
-  let offset = cardIndex - activeIndex;
-  if (offset > PAGE_COUNT / 2) offset -= PAGE_COUNT;
-  if (offset < -PAGE_COUNT / 2) offset += PAGE_COUNT;
-  return offset === 0 ? "0" : String(offset);
+function preloadBackgrounds() {
+  for (let i = 0; i < PAGE_COUNT; i++) {
+    const img = new Image();
+    img.decoding = "async";
+    img.src = portfolioData.pages[i].bgImage;
+  }
 }
 
-function beginPageTransition() {
-  shell.classList.add("is-transitioning");
+function warmCompositor() {
+  void track.offsetWidth;
+  for (let i = 0; i < PAGE_COUNT; i++) {
+    void pageCards[i].offsetWidth;
+    void bgLayers[i].offsetWidth;
+  }
+}
+
+function endPageTransition() {
+  if (!shell.classList.contains("is-transitioning")) return;
+  shell.classList.remove("is-transitioning");
+  root.classList.remove("is-page-changing");
+  pendingTransitionEnds = 0;
   window.clearTimeout(transitionTimer);
-  transitionTimer = window.setTimeout(() => {
-    shell.classList.remove("is-transitioning");
-    transitionTimer = 0;
-  }, 320);
+  transitionTimer = 0;
+}
+
+function beginPageTransition(updatedCards) {
+  root.classList.add("is-page-changing");
+  shell.classList.add("is-transitioning");
+  pendingTransitionEnds = updatedCards;
+  window.clearTimeout(transitionTimer);
+  transitionTimer = window.setTimeout(endPageTransition, 360);
+}
+
+function onCardTransitionEnd(event) {
+  if (!shell.classList.contains("is-transitioning")) return;
+  if (event.propertyName !== "transform") return;
+  if (!event.target.classList.contains("page-card")) return;
+  pendingTransitionEnds -= 1;
+  if (pendingTransitionEnds <= 0) endPageTransition();
 }
 
 function commitActivePage(newIndex) {
@@ -338,11 +394,10 @@ function commitActivePage(newIndex) {
 
   const prevIndex = activeIndex;
   activeIndex = newIndex;
-  const page = portfolioData.pages[activeIndex];
 
-  root.style.setProperty("--active-color", page.color);
+  root.style.setProperty("--active-color", pageColors[activeIndex]);
   circleIndex.textContent = circleIndexLabels[activeIndex];
-  circleLabel.textContent = page.title;
+  circleLabel.textContent = pageTitles[activeIndex];
 
   if (prevIndex >= 0) {
     bgLayers[prevIndex].classList.remove("is-active");
@@ -356,14 +411,18 @@ function commitActivePage(newIndex) {
   indicatorDots[activeIndex].classList.add("active");
   circleSegments[activeIndex].classList.add("active");
 
+  const posRow = POS_MATRIX[activeIndex];
+  let updatedCards = 0;
+
   for (let i = 0; i < PAGE_COUNT; i++) {
-    const posKey = getCardPosKey(i);
+    const posKey = posRow[i];
     if (cardPosCache[i] === posKey) continue;
     cardPosCache[i] = posKey;
     pageCards[i].dataset.pos = posKey;
+    updatedCards += 1;
   }
 
-  beginPageTransition();
+  if (updatedCards > 0) beginPageTransition(updatedCards);
 }
 
 function setActivePage(index) {
@@ -373,6 +432,19 @@ function setActivePage(index) {
   pageRafId = requestAnimationFrame(() => {
     pageRafId = 0;
     commitActivePage(pendingPageIndex);
+  });
+}
+
+function primeCarousel() {
+  root.classList.add("no-transition");
+  shell.classList.add("no-transition");
+  commitActivePage(0);
+  warmCompositor();
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      root.classList.remove("no-transition");
+      shell.classList.remove("no-transition");
+    });
   });
 }
 
@@ -393,7 +465,7 @@ function openContactLink(target) {
   window.location.href = href;
 }
 
-async function copyValue(value, label = "") {
+async function copyValue(value, label) {
   if (!value) return;
   try {
     await navigator.clipboard.writeText(value);
@@ -408,7 +480,7 @@ async function copyValue(value, label = "") {
     document.execCommand("copy");
     textarea.remove();
   }
-  copyTooltip.textContent = `Đã sao chép ${label || "nội dung"}`;
+  copyTooltip.textContent = "Đã sao chép " + (label || "nội dung");
   copyTooltip.classList.add("visible");
   window.clearTimeout(tooltipTimer);
   tooltipTimer = window.setTimeout(() => copyTooltip.classList.remove("visible"), 1500);
@@ -422,95 +494,45 @@ function startDrag(clientX) {
   shell.classList.add("dragging");
 }
 
-function moveDrag(clientX) {
+function onPointerMove(event) {
   if (!isDragging) return;
-  dragCurrentX = clientX;
+  dragCurrentX = event.clientX;
 }
 
 function endDrag() {
   if (!isDragging) return;
   const distance = dragCurrentX - dragStartX;
-  
-  // Xác định xem người dùng vuốt hay chỉ click
-  if (Math.abs(distance) > 10) {
-    wasDragged = true; 
-  }
-  
+
+  if (Math.abs(distance) > 10) wasDragged = true;
+
   if (Math.abs(distance) > 55) {
     setActivePage(activeIndex + (distance < 0 ? 1 : -1));
   }
-  
+
   isDragging = false;
   shell.classList.remove("dragging");
-  
-  // Xóa cờ wasDragged sau một khoảng trễ nhỏ để sự kiện click kịp nhận diện
-  setTimeout(() => { wasDragged = false; }, 50);
+  window.setTimeout(() => { wasDragged = false; }, 50);
 }
 
-// Khởi tạo
-renderHeader();
-renderProfile();
-renderMenu();
-renderPages();
-renderIndicators();
-renderCircle();
-renderBackgrounds();
-cacheCarouselDom();
-setTheme(localStorage.getItem("portfolio-theme") || "dark");
-updateLayoutMetrics();
-setActivePage(0);
-
-// Sự kiện
-document.querySelectorAll(".header-menu, .carousel-indicators, .circle-navigation").forEach(el => {
-  el.addEventListener("click", event => {
-    const target = event.target.closest("[data-index]");
-    if (target) setActivePage(Number(target.dataset.index));
-  });
-});
-
-// Bỏ setPointerCapture để không bị "nuốt" sự kiện click trên Desktop (Ubuntu/Windows)
-shell.addEventListener("pointerdown", event => {
-  // Bỏ qua nếu người dùng đang click chuột phải
-  if (event.button !== 0) return; 
-  startDrag(event.clientX);
-});
-
-// Chuyển việc lắng nghe move và up lên window để thao tác kéo mượt hơn 
-// ngay cả khi chuột trượt ra ngoài khối carousel
-window.addEventListener("pointermove", event => {
-  if (isDragging) moveDrag(event.clientX);
-});
-
-window.addEventListener("pointerup", event => {
-  if (isDragging) endDrag();
-});
-
-window.addEventListener("pointercancel", event => {
-  if (isDragging) endDrag();
-});
-
-document.addEventListener("keydown", event => {
-  if (event.key === "ArrowRight") setActivePage(activeIndex + 1);
-  if (event.key === "ArrowLeft") setActivePage(activeIndex - 1);
-});
-
-// XỬ LÝ CLICK TỔNG HỢP VỚI CÁC CẢI TIẾN
-document.addEventListener("click", event => {
-  // 1. Chặn click nếu vừa thực hiện thao tác vuốt (swipe)
+function onDocumentClick(event) {
   if (wasDragged) {
     event.preventDefault();
     event.stopPropagation();
     return;
   }
 
-  // 2. Chuyển trang khi bấm vào thẻ bị mờ (những thẻ nằm rìa không active)
+  const navTarget = event.target.closest(".header-menu [data-index], .carousel-indicators [data-index], .circle-navigation [data-index]");
+  if (navTarget) {
+    setActivePage(Number(navTarget.dataset.index));
+    return;
+  }
+
   const cardTarget = event.target.closest(".page-card");
   if (cardTarget && cardTarget.dataset.pos !== "0") {
     setActivePage(Number(cardTarget.dataset.pageIndex));
     return;
   }
 
-  // 3. Xử lý nút Copy (cả ở Profile và trong Card-inner)
   const copyTarget = event.target.closest("[data-copy]");
   if (copyTarget && (event.target.closest(".copy-button") || event.target.closest(".copy-icon"))) {
     event.preventDefault();
@@ -519,19 +541,59 @@ document.addEventListener("click", event => {
     return;
   }
 
-  // 4. Xử lý click chuyển hướng contact link
   const contactTarget = event.target.closest(".contact-link");
-  if (contactTarget) {
-    openContactLink(contactTarget);
-  }
+  if (contactTarget) openContactLink(contactTarget);
+}
+
+function onKeyDown(event) {
+  if (event.key === "ArrowRight") setActivePage(activeIndex + 1);
+  if (event.key === "ArrowLeft") setActivePage(activeIndex - 1);
+}
+
+// ==========================================
+// 5. KHỞI TẠO
+// ==========================================
+renderHeader();
+renderProfile();
+renderMenu();
+renderPages();
+renderIndicators();
+renderCircle();
+renderBackgrounds();
+cacheCarouselDom();
+preloadBackgrounds();
+setTheme(localStorage.getItem("portfolio-theme") || "dark");
+updateLayoutMetrics();
+primeCarousel();
+
+track.addEventListener("transitionend", onCardTransitionEnd, true);
+
+document.addEventListener("click", onDocumentClick);
+document.addEventListener("keydown", onKeyDown);
+
+shell.addEventListener("pointerdown", (event) => {
+  if (event.button !== 0) return;
+  startDrag(event.clientX);
 });
+
+window.addEventListener("pointermove", onPointerMove, { passive: true });
+window.addEventListener("pointerup", endDrag, { passive: true });
+window.addEventListener("pointercancel", endDrag, { passive: true });
 
 themeToggle.addEventListener("click", () => {
   setTheme(document.body.classList.contains("dark-mode") ? "light" : "dark");
 });
 
-window.addEventListener("resize", () => {
-  window.clearTimeout(resizeTimer);
-  resizeTimer = window.setTimeout(updateLayoutMetrics, 80);
-});
-window.addEventListener("load", updateLayoutMetrics);
+if (typeof ResizeObserver !== "undefined") {
+  const headerObserver = new ResizeObserver((entries) => {
+    const entry = entries[0];
+    if (!entry) return;
+    scheduleLayoutMetrics();
+  });
+  headerObserver.observe(siteHeader);
+} else {
+  window.addEventListener("resize", scheduleLayoutMetrics, { passive: true });
+}
+
+window.addEventListener("resize", scheduleLayoutMetrics, { passive: true });
+window.addEventListener("load", scheduleLayoutMetrics, { passive: true });
