@@ -262,6 +262,24 @@ button {
   cursor: grabbing;
 }
 
+.carousel-shell {
+  overflow: hidden;
+  padding: 6px 0 14px;
+  /* Ép trình duyệt: Chỉ tự cuộn dọc, vuốt ngang để JS tự lo */
+  touch-action: pan-y; 
+  cursor: grab;
+}
+
+.carousel-shell.dragging {
+  cursor: grabbing;
+}
+
+.carousel-shell.dragging .page-card {
+  pointer-events: none !important;
+  /* Tắt tạm kính mờ khi đang vuốt để giảm tải GPU */
+  backdrop-filter: none !important; 
+}
+
 .carousel-track {
   position: relative;
   height: clamp(350px, calc(var(--available-height) - 72px), 430px);
@@ -281,16 +299,18 @@ button {
   background: var(--surface);
   box-shadow: var(--soft-shadow);
   transform: translate3d(calc(-50% + var(--offset) * 68%), 0, 0) scale(var(--scale));
+  will-change: transform, opacity;
   opacity: var(--opacity);
   z-index: var(--z-index);
   pointer-events: var(--pointer-events);
   backdrop-filter: blur(22px);
-  transition: transform var(--transition), opacity var(--transition), box-shadow var(--transition), border-color var(--transition), background-color var(--transition);
+  transition: transform var(--transition), opacity var(--transition), border-color var(--transition), background-color var(--transition);
 }
 
 .page-card.active {
   border-color: color-mix(in srgb, var(--active-color) 28%, var(--line));
   box-shadow: var(--shadow);
+  backdrop-filter: blur(22px);
 }
 
 .page-card.hidden-card {
@@ -312,10 +332,13 @@ button {
   gap: 22px;
   height: 100%;
   padding: 26px;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   scroll-behavior: smooth;
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--active-color) 55%, transparent) transparent;
+  -webkit-overflow-scrolling: touch; /* Cuộn mượt mà như app native trên iOS/Android */
+  overscroll-behavior-y: contain; /* Ngăn tình trạng cuộn kịch đáy thẻ bị nảy (bounce) làm giật web */
 }
 
 .card-inner::-webkit-scrollbar {
@@ -404,6 +427,7 @@ button {
   box-shadow: 0 12px 24px color-mix(in srgb, var(--active-color) 22%, transparent);
   transition: transform var(--transition), background-color var(--transition), box-shadow var(--transition);
   will-change: transform, opacity;
+  contain: layout paint;
 }
 
 .primary-button {
@@ -699,7 +723,7 @@ button {
   border-radius: 30px;
   background: var(--surface);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(22px);
+  backdrop-filter: none;
   transition: background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
 }
 
@@ -936,12 +960,17 @@ button {
     height: 600px;
     border-radius: 28px;
     transform: translateX(calc(-50% + var(--offset) * 72%)) scale(var(--scale));
+    backdrop-filter: none;
   }
 
   .card-inner {
     grid-template-columns: 1fr;
     gap: 16px;
     padding: 20px;
+  }
+
+  .page-card.active{
+    backdrop-filter: blur(4px);
   }
 
   .page-card h1 {
