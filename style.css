@@ -4,8 +4,8 @@
   --page-bgn: #17203300;
   --text: #172033;
   --muted: #697386;
-  --soft: rgba(244, 247, 251, 0.82);
-  --surface: rgba(255, 255, 255, 0.78);
+  --soft: rgba(141, 171, 209, 0.82);
+  --surface: rgb(255, 255, 255);
   --surface-strong: rgba(255, 255, 255, 0.9);
   --surface-soft: rgba(251, 253, 255, 0.72);
   --line: rgba(20, 31, 52, 0.08);
@@ -44,7 +44,7 @@ body.dark-mode {
   --text: #f8fafc;
   --muted: #cbd5e1;
   --soft: rgba(30, 41, 59, 0.72);
-  --surface: rgba(30, 41, 59, 0.72);
+  --surface: #111827;
   --surface-strong: rgba(30, 41, 59, 0.88);
   --surface-soft: rgba(15, 23, 42, 0.52);
   --line: rgba(255, 255, 255, 0.08);
@@ -117,7 +117,6 @@ button {
   border-radius: 26px;
   background: var(--surface);
   box-shadow: var(--soft-shadow);
-  backdrop-filter: blur(22px);
   transition: background-color var(--transition), border-color var(--transition), box-shadow var(--transition);
 }
 
@@ -226,7 +225,6 @@ button {
   box-shadow: inset 0 0 0 1px var(--line);
   text-align: center;
   pointer-events: none;
-  backdrop-filter: blur(18px);
   transition: background-color var(--transition), box-shadow var(--transition);
 }
 
@@ -303,14 +301,12 @@ button {
   opacity: var(--opacity);
   z-index: var(--z-index);
   pointer-events: var(--pointer-events);
-  backdrop-filter: blur(22px);
   transition: transform var(--transition), opacity var(--transition), border-color var(--transition), background-color var(--transition);
 }
 
 .page-card.active {
   border-color: color-mix(in srgb, var(--active-color) 28%, var(--line));
   box-shadow: var(--shadow);
-  backdrop-filter: blur(22px);
 }
 
 .page-card.hidden-card {
@@ -838,7 +834,6 @@ button {
   opacity: 0;
   pointer-events: none;
   transform: translateY(-10px);
-  backdrop-filter: blur(18px);
   transition: opacity var(--transition), transform var(--transition), background-color var(--transition), color var(--transition), border-color var(--transition);
 }
 
@@ -862,7 +857,6 @@ button {
   background: var(--surface-strong);
   box-shadow: var(--shadow);
   cursor: pointer;
-  backdrop-filter: blur(18px);
   transition: transform var(--transition), background-color var(--transition), color var(--transition), border-color var(--transition), box-shadow var(--transition);
 }
 
