@@ -74,10 +74,10 @@ const portfolioData = {
     ],
   },
   pages: [
-    { id: "intro", title: "Giới thiệu", color: "#4B5694", bgImage: "./image/anh1.png" },
-    { id: "projects", title: "Dự án", color: "#DB1A1A", bgImage: "./image/anh2.png" },
-    { id: "profile", title: "Hồ sơ", color: "#FF9D23", bgImage: "./image/anh3.png" },
-    { id: "contact", title: "Liên hệ", color: "#48A111", bgImage: "./image/anh4.png" }
+    { id: "intro", title: "Giới thiệu", color: "#4B5694", bgImage: "./image/anh1.webp" },
+    { id: "projects", title: "Dự án", color: "#DB1A1A", bgImage: "./image/anh2.webp" },
+    { id: "profile", title: "Hồ sơ", color: "#FF9D23", bgImage: "./image/anh3.webp" },
+    { id: "contact", title: "Liên hệ", color: "#48A111", bgImage: "./image/anh4.webp" }
   ]
 };
 
