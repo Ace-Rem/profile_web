@@ -256,6 +256,12 @@ function renderPages() {
   track.innerHTML = html;
 }
 
+function renderBackgrounds() {
+  themeBackground.innerHTML = portfolioData.pages.map((page, index) => 
+    `<div class="bg-layer" data-index="${index}" style="background-image: url('${page.bgImage}')"></div>`
+  ).join("");
+}
+
 // ==========================================
 // 4. CORE LOGIC & SỰ KIỆN CẢI TIẾN
 // ==========================================
@@ -305,8 +311,9 @@ function setActivePage(index) {
   circleIndex.textContent = String(activeIndex + 1).padStart(2, "0");
   circleLabel.textContent = activePage.title;
   
-  // Cập nhật ảnh nền tùy chỉnh
-  themeBackground.style.backgroundImage = `url('${activePage.bgImage}')`;
+  document.querySelectorAll(".bg-layer").forEach((layer, idx) => {
+    layer.style.opacity = idx === activeIndex ? "1" : "0"; 
+  });
 
   document.querySelectorAll(".menu-button").forEach((btn, idx) => btn.classList.toggle("active", idx === activeIndex));
   document.querySelectorAll(".indicator-dot").forEach((dot, idx) => dot.classList.toggle("active", idx === activeIndex));
@@ -405,7 +412,8 @@ renderMenu();
 renderPages();
 renderIndicators();
 renderCircle();
-setTheme(localStorage.getItem("portfolio-theme") || "light");
+renderBackgrounds();
+setTheme(localStorage.getItem("portfolio-theme") || "dark");
 updateLayoutMetrics();
 setActivePage(0);
 
