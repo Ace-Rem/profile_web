@@ -99,13 +99,26 @@ const copyTooltip = document.querySelector(".copy-tooltip");
 const siteHeader = document.querySelector(".site-header");
 const themeBackground = document.querySelector(".theme-background");
 
-let activeIndex = 0;
+const PAGE_COUNT = portfolioData.pages.length;
+const circleIndexLabels = portfolioData.pages.map((_, i) => String(i + 1).padStart(2, "0"));
+const cardPosCache = new Array(PAGE_COUNT);
+
+let activeIndex = -1;
 let dragStartX = 0;
 let dragCurrentX = 0;
 let isDragging = false;
 let wasDragged = false; // Biến cờ để phân biệt vuốt và click
 let tooltipTimer;
 let resizeTimer;
+let transitionTimer = 0;
+let pageRafId = 0;
+let pendingPageIndex = 0;
+
+let pageCards;
+let menuButtons;
+let indicatorDots;
+let circleSegments;
+let bgLayers;
 
 // ==========================================
 // 3. RENDER FUNCTIONS
@@ -295,42 +308,71 @@ function updateLayoutMetrics() {
   root.style.setProperty("--available-height", `${Math.max(window.innerHeight - headerOffset, 360)}px`);
 }
 
-function getShortestOffset(index) {
-  const total = portfolioData.pages.length;
-  let offset = index - activeIndex;
-  if (offset > total / 2) offset -= total;
-  if (offset < -total / 2) offset += total;
-  return offset;
+function cacheCarouselDom() {
+  pageCards = track.children;
+  menuButtons = menu.children;
+  indicatorDots = indicators.children;
+  circleSegments = circle.querySelectorAll(".circle-segment");
+  bgLayers = themeBackground.children;
+  for (let i = 0; i < PAGE_COUNT; i++) cardPosCache[i] = null;
+}
+
+function getCardPosKey(cardIndex) {
+  let offset = cardIndex - activeIndex;
+  if (offset > PAGE_COUNT / 2) offset -= PAGE_COUNT;
+  if (offset < -PAGE_COUNT / 2) offset += PAGE_COUNT;
+  return offset === 0 ? "0" : String(offset);
+}
+
+function beginPageTransition() {
+  shell.classList.add("is-transitioning");
+  window.clearTimeout(transitionTimer);
+  transitionTimer = window.setTimeout(() => {
+    shell.classList.remove("is-transitioning");
+    transitionTimer = 0;
+  }, 320);
+}
+
+function commitActivePage(newIndex) {
+  if (newIndex === activeIndex) return;
+
+  const prevIndex = activeIndex;
+  activeIndex = newIndex;
+  const page = portfolioData.pages[activeIndex];
+
+  root.style.setProperty("--active-color", page.color);
+  circleIndex.textContent = circleIndexLabels[activeIndex];
+  circleLabel.textContent = page.title;
+
+  if (prevIndex >= 0) {
+    bgLayers[prevIndex].classList.remove("is-active");
+    menuButtons[prevIndex].classList.remove("active");
+    indicatorDots[prevIndex].classList.remove("active");
+    circleSegments[prevIndex].classList.remove("active");
+  }
+
+  bgLayers[activeIndex].classList.add("is-active");
+  menuButtons[activeIndex].classList.add("active");
+  indicatorDots[activeIndex].classList.add("active");
+  circleSegments[activeIndex].classList.add("active");
+
+  for (let i = 0; i < PAGE_COUNT; i++) {
+    const posKey = getCardPosKey(i);
+    if (cardPosCache[i] === posKey) continue;
+    cardPosCache[i] = posKey;
+    pageCards[i].dataset.pos = posKey;
+  }
+
+  beginPageTransition();
 }
 
 function setActivePage(index) {
-  activeIndex = (index + portfolioData.pages.length) % portfolioData.pages.length;
-  const activePage = portfolioData.pages[activeIndex];
-  
-  root.style.setProperty("--active-color", activePage.color);
-  circleIndex.textContent = String(activeIndex + 1).padStart(2, "0");
-  circleLabel.textContent = activePage.title;
-  
-  document.querySelectorAll(".bg-layer").forEach((layer, idx) => {
-    layer.style.opacity = idx === activeIndex ? "1" : "0"; 
-  });
-
-  document.querySelectorAll(".menu-button").forEach((btn, idx) => btn.classList.toggle("active", idx === activeIndex));
-  document.querySelectorAll(".indicator-dot").forEach((dot, idx) => dot.classList.toggle("active", idx === activeIndex));
-  document.querySelectorAll(".circle-segment").forEach((seg, idx) => seg.classList.toggle("active", idx === activeIndex));
-
-  document.querySelectorAll(".page-card").forEach((card, cardIndex) => {
-    const offset = getShortestOffset(cardIndex);
-    const visible = Math.abs(offset) <= 1;
-    card.classList.toggle("active", cardIndex === activeIndex);
-    card.classList.toggle("hidden-card", !visible);
-    card.style.setProperty("--offset", offset);
-    card.style.setProperty("--scale", cardIndex === activeIndex ? "1" : "0.8");
-    card.style.setProperty("--opacity", visible ? (cardIndex === activeIndex ? "1" : "0.48") : "0");
-    card.style.setProperty("--z-index", cardIndex === activeIndex ? "3" : visible ? "2" : "1");
-    
-    // CẢI TIẾN: Cho phép nhận sự kiện click ở thẻ kề bên (visible) để chuyển trang
-    card.style.setProperty("--pointer-events", visible ? "auto" : "none");
+  pendingPageIndex = (index + PAGE_COUNT) % PAGE_COUNT;
+  if (pendingPageIndex === activeIndex) return;
+  if (pageRafId) return;
+  pageRafId = requestAnimationFrame(() => {
+    pageRafId = 0;
+    commitActivePage(pendingPageIndex);
   });
 }
 
@@ -413,6 +455,7 @@ renderPages();
 renderIndicators();
 renderCircle();
 renderBackgrounds();
+cacheCarouselDom();
 setTheme(localStorage.getItem("portfolio-theme") || "dark");
 updateLayoutMetrics();
 setActivePage(0);
@@ -462,7 +505,7 @@ document.addEventListener("click", event => {
 
   // 2. Chuyển trang khi bấm vào thẻ bị mờ (những thẻ nằm rìa không active)
   const cardTarget = event.target.closest(".page-card");
-  if (cardTarget && !cardTarget.classList.contains("active")) {
+  if (cardTarget && cardTarget.dataset.pos !== "0") {
     setActivePage(Number(cardTarget.dataset.pageIndex));
     return;
   }

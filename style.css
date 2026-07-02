@@ -80,7 +80,10 @@ button {
   opacity: 0;
   z-index: 0;
   transition: opacity 0.5s ease-in-out;
-  will-change: opacity; 
+}
+
+.bg-layer.is-active {
+  opacity: 1;
 }
 
 .theme-background::after {
@@ -275,7 +278,11 @@ button {
 .carousel-shell.dragging .page-card {
   pointer-events: none !important;
   /* Tắt tạm kính mờ khi đang vuốt để giảm tải GPU */
-  backdrop-filter: none !important; 
+  backdrop-filter: none !important;
+}
+
+.carousel-shell.is-transitioning .page-card {
+  will-change: transform;
 }
 
 .carousel-track {
@@ -296,30 +303,48 @@ button {
   border-radius: 32px;
   background: var(--surface);
   box-shadow: var(--soft-shadow);
-  transform: translate3d(calc(-50% + var(--offset) * 68%), 0, 0) scale(var(--scale));
-  will-change: transform, opacity;
-  opacity: var(--opacity);
-  z-index: var(--z-index);
-  pointer-events: var(--pointer-events);
-  transition: transform var(--transition), opacity var(--transition), border-color var(--transition), background-color var(--transition);
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+  cursor: pointer;
+  transform: translate3d(calc(-50% + 136%), 0, 0) scale(0.8);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: transform var(--transition), opacity var(--transition);
 }
 
-.page-card.active {
+.page-card[data-pos="0"] {
+  transform: translate3d(-50%, 0, 0) scale(1);
+  opacity: 1;
+  z-index: 3;
+  pointer-events: auto;
+  cursor: default;
   border-color: color-mix(in srgb, var(--active-color) 28%, var(--line));
   box-shadow: var(--shadow);
+  transition: transform var(--transition), opacity var(--transition), border-color var(--transition);
 }
 
-.page-card.hidden-card {
-  opacity: 0;
-  pointer-events: none;
+.page-card[data-pos="-1"],
+.page-card[data-pos="1"] {
+  opacity: 0.48;
+  z-index: 2;
+  pointer-events: auto;
 }
 
-/* Thêm đoạn này vào gần chỗ khai báo .page-card */
-.page-card:not(.active) {
-  cursor: pointer;
+.page-card[data-pos="-1"] {
+  transform: translate3d(calc(-50% - 68%), 0, 0) scale(0.8);
 }
-.page-card.active {
-  cursor: default;
+
+.page-card[data-pos="1"] {
+  transform: translate3d(calc(-50% + 68%), 0, 0) scale(0.8);
+}
+
+.page-card[data-pos="-2"] {
+  transform: translate3d(calc(-50% - 136%), 0, 0) scale(0.8);
+}
+
+.page-card[data-pos="2"] {
+  transform: translate3d(calc(-50% + 136%), 0, 0) scale(0.8);
 }
 
 .card-inner {
@@ -953,18 +978,35 @@ button {
     width: 82%;
     height: 600px;
     border-radius: 28px;
-    transform: translateX(calc(-50% + var(--offset) * 72%)) scale(var(--scale));
     backdrop-filter: none;
+    transform: translate3d(calc(-50% + 144%), 0, 0) scale(0.8);
+  }
+
+  .page-card[data-pos="0"] {
+    transform: translate3d(-50%, 0, 0) scale(1);
+    backdrop-filter: blur(4px);
+  }
+
+  .page-card[data-pos="-1"] {
+    transform: translate3d(calc(-50% - 72%), 0, 0) scale(0.8);
+  }
+
+  .page-card[data-pos="1"] {
+    transform: translate3d(calc(-50% + 72%), 0, 0) scale(0.8);
+  }
+
+  .page-card[data-pos="-2"] {
+    transform: translate3d(calc(-50% - 144%), 0, 0) scale(0.8);
+  }
+
+  .page-card[data-pos="2"] {
+    transform: translate3d(calc(-50% + 144%), 0, 0) scale(0.8);
   }
 
   .card-inner {
     grid-template-columns: 1fr;
     gap: 16px;
     padding: 20px;
-  }
-
-  .page-card.active{
-    backdrop-filter: blur(4px);
   }
 
   .page-card h1 {
