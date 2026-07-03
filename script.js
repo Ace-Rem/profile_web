@@ -121,7 +121,9 @@ for (let active = 0; active < PAGE_COUNT; active++) {
 let activeIndex = -1;
 let dragStartX = 0;
 let dragCurrentX = 0;
-let isDragging = false;
+let dragStartY = 0;
+let dragPending = false;
+let dragAxis = null;
 let wasDragged = false;
 let tooltipTimer = 0;
 let layoutRafId = 0;
@@ -486,31 +488,109 @@ async function copyValue(value, label) {
   tooltipTimer = window.setTimeout(() => copyTooltip.classList.remove("visible"), 1500);
 }
 
-function startDrag(clientX) {
-  isDragging = true;
-  wasDragged = false;
-  dragStartX = clientX;
-  dragCurrentX = clientX;
-  shell.classList.add("dragging");
+  const AXIS_LOCK_PX = 10;
+  const CAROUSEL_DRAG_PX = 55;
+  const CAROUSEL_TAP_DRAG_PX = 10;
+  const SCROLL_EDGE_EPS = 2;
+  const COARSE_POINTER = window.matchMedia("(pointer: coarse)").matches;
+
+  function cardInnerCanScrollY(inner, deltaY) {
+    const maxScroll = inner.scrollHeight - inner.clientHeight;
+    if (maxScroll <= SCROLL_EDGE_EPS) return false;
+    if (deltaY > 0) return inner.scrollTop > SCROLL_EDGE_EPS;
+    if (deltaY < 0) return inner.scrollTop < maxScroll - SCROLL_EDGE_EPS;
+    return false;
+  }
+
+  let activeCardInnerTouch = null;
+  let activeTouchState = null;
+
+  function resetCardInnerTouch() {
+    activeCardInnerTouch = null;
+    activeTouchState = null;
+  }
+
+  function setupCardInnerTouchScroll() {
+    track.addEventListener("touchstart", (event) => {
+      const inner = event.target.closest(".card-inner");
+      if (!inner || event.touches.length !== 1) {
+        resetCardInnerTouch();
+        return;
+      }
+      activeCardInnerTouch = inner;
+      activeTouchState = {
+        startY: event.touches[0].clientY,
+        startX: event.touches[0].clientX,
+        axis: null
+      };
+    }, { passive: true });
+
+    track.addEventListener("touchmove", (event) => {
+      if (!COARSE_POINTER || !activeCardInnerTouch || !activeTouchState || event.touches.length !== 1) return;
+      const touch = event.touches[0];
+      const dy = touch.clientY - activeTouchState.startY;
+      const dx = touch.clientX - activeTouchState.startX;
+      if (!activeTouchState.axis) {
+        if (Math.abs(dx) < AXIS_LOCK_PX && Math.abs(dy) < AXIS_LOCK_PX) return;
+        activeTouchState.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+      }
+
+      if (activeTouchState.axis === "x") return;
+      if (cardInnerCanScrollY(activeCardInnerTouch, dy)) {
+        event.preventDefault();
+      }
+    }, { passive: false });
+    track.addEventListener("touchend", resetCardInnerTouch, { passive: true });
+    track.addEventListener("touchcancel", resetCardInnerTouch, { passive: true });
+  }
+
+  function startDrag(clientX, clientY) {
+    dragPending = true;
+    isDragging = false;
+    wasDragged = false;
+    dragAxis = null;
+    dragStartX = clientX;
+    dragStartY = clientY;
+    dragCurrentX = clientX;
 }
 
 function onPointerMove(event) {
+  if (!dragPending && !isDragging) return;
+  const dx = event.clientX - dragStartX;
+  const dy = event.clientY - dragStartY;
+  if (dragPending && !dragAxis) {
+    if (Math.abs(dx) < AXIS_LOCK_PX && Math.abs(dy) < AXIS_LOCK_PX) return;
+    dragAxis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+    if (dragAxis === "y") {
+      dragPending = false;
+      return;
+    }
+    isDragging = true;
+    dragPending = false;
+    shell.classList.add("dragging");
+  }
+
   if (!isDragging) return;
   dragCurrentX = event.clientX;
 }
 
 function endDrag() {
-  if (!isDragging) return;
-  const distance = dragCurrentX - dragStartX;
+  if (!isDragging && !dragPending) return;
 
-  if (Math.abs(distance) > 10) wasDragged = true;
+  if (isDragging) {
+    const distance = dragCurrentX - dragStartX;
 
-  if (Math.abs(distance) > 55) {
-    setActivePage(activeIndex + (distance < 0 ? 1 : -1));
+
+    if (Math.abs(distance) > CAROUSEL_TAP_DRAG_PX) wasDragged = true;
+    if (Math.abs(distance) > CAROUSEL_DRAG_PX) {
+      setActivePage(activeIndex + (distance < 0 ? 1 : -1));
+    }
+    shell.classList.remove("dragging");
   }
 
   isDragging = false;
-  shell.classList.remove("dragging");
+  dragPending = false;
+  dragAxis = null;
   window.setTimeout(() => { wasDragged = false; }, 50);
 }
 
@@ -573,7 +653,8 @@ document.addEventListener("keydown", onKeyDown);
 
 shell.addEventListener("pointerdown", (event) => {
   if (event.button !== 0) return;
-  startDrag(event.clientX);
+  startDrag(event.clientX, event.clientY);
+  setupCardInnerTouchScroll();
 });
 
 window.addEventListener("pointermove", onPointerMove, { passive: true });
