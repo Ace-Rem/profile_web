@@ -513,7 +513,7 @@ async function copyValue(value, label) {
   function setupCardInnerTouchScroll() {
     track.addEventListener("touchstart", (event) => {
       const inner = event.target.closest(".card-inner");
-      if (!inner || event.touches.length !== 1) {
+      if (!inner || inner.closest(".page-card")?.dataset.pos !== "0" || event.touches.length !== 1) {
         resetCardInnerTouch();
         return;
       }
@@ -630,6 +630,181 @@ function onKeyDown(event) {
   if (event.key === "ArrowLeft") setActivePage(activeIndex - 1);
 }
 
+const THEME_TOGGLE_HOLD_MS = 220;
+const THEME_TOGGLE_MOVE_PX = 8;
+const THEME_TOGGLE_EDGE_PX = 10;
+const THEME_TOGGLE_POS_KEY = "portfolio-theme-toggle-pos";
+const THEME_TOGGLE_FINE_POINTER = window.matchMedia("(pointer: fine)").matches;
+
+let themeToggleHoldTimer = 0;
+let themeToggleDragging = false;
+let themeTogglePressed = false;
+let themeToggleWasMoved = false;
+let themeToggleStartX = 0;
+let themeToggleStartY = 0;
+let themeToggleOriginLeft = 0;
+let themeToggleOriginTop = 0;
+let themeTogglePointerId = -1;
+
+function clampThemeTogglePosition(left, top) {
+  const width = themeToggle.offsetWidth;
+  const height = themeToggle.offsetHeight;
+  return {
+    left: Math.min(Math.max(THEME_TOGGLE_EDGE_PX, left), window.innerWidth - width - THEME_TOGGLE_EDGE_PX),
+    top: Math.min(Math.max(THEME_TOGGLE_EDGE_PX, top), window.innerHeight - height - THEME_TOGGLE_EDGE_PX)
+  };
+}
+
+function applyThemeTogglePosition(left, top) {
+  const next = clampThemeTogglePosition(left, top);
+  themeToggle.style.left = next.left + "px";
+  themeToggle.style.top = next.top + "px";
+  themeToggle.style.bottom = "auto";
+  themeToggle.classList.add("is-positioned");
+  return next;
+}
+
+function ensureThemeTogglePixelPosition() {
+  const rect = themeToggle.getBoundingClientRect();
+  return applyThemeTogglePosition(rect.left, rect.top);
+}
+
+function saveThemeTogglePosition() {
+  const left = parseFloat(themeToggle.style.left);
+  const top = parseFloat(themeToggle.style.top);
+  if (!Number.isFinite(left) || !Number.isFinite(top)) return;
+  localStorage.setItem(THEME_TOGGLE_POS_KEY, JSON.stringify({ x: left, y: top }));
+}
+
+function restoreThemeTogglePosition() {
+  const saved = localStorage.getItem(THEME_TOGGLE_POS_KEY);
+  if (!saved) return;
+  try {
+    const { x, y } = JSON.parse(saved);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+    applyThemeTogglePosition(x, y);
+  } catch {
+    localStorage.removeItem(THEME_TOGGLE_POS_KEY);
+  }
+}
+
+function beginThemeToggleDrag(pointerId) {
+  themeToggleDragging = true;
+  themeTogglePointerId = pointerId;
+  themeToggle.classList.add("is-dragging");
+  themeToggle.classList.remove("is-holding");
+  try {
+    themeToggle.setPointerCapture(pointerId);
+  } catch {
+    /* noop */
+  }
+}
+
+function clearThemeToggleHoldTimer() {
+  window.clearTimeout(themeToggleHoldTimer);
+  themeToggleHoldTimer = 0;
+}
+
+function clearThemeToggleInteraction() {
+  clearThemeToggleHoldTimer();
+  themeToggleDragging = false;
+  themeTogglePointerId = -1;
+  themeToggle.classList.remove("is-dragging", "is-holding");
+}
+
+function resetThemeToggleDragState() {
+  clearThemeToggleInteraction();
+  themeTogglePressed = false;
+}
+
+function onThemeTogglePointerDown(event) {
+  if (event.button !== 0) return;
+
+  themeToggleWasMoved = false;
+  clearThemeToggleInteraction();
+  themeTogglePressed = true;
+
+  const origin = ensureThemeTogglePixelPosition();
+  themeToggleStartX = event.clientX;
+  themeToggleStartY = event.clientY;
+  themeToggleOriginLeft = origin.left;
+  themeToggleOriginTop = origin.top;
+
+  themeToggle.classList.add("is-holding");
+  themeToggleHoldTimer = window.setTimeout(() => {
+    themeToggleHoldTimer = 0;
+    if (!themeTogglePressed) return;
+    beginThemeToggleDrag(event.pointerId);
+  }, THEME_TOGGLE_HOLD_MS);
+}
+
+function onThemeTogglePointerMove(event) {
+  if (!themeTogglePressed && !themeToggleDragging) return;
+  if ((event.buttons & 1) === 0 && !themeToggleDragging) return;
+  if (themeTogglePointerId !== -1 && event.pointerId !== themeTogglePointerId && themeToggleDragging) return;
+
+  const dx = event.clientX - themeToggleStartX;
+  const dy = event.clientY - themeToggleStartY;
+
+  if (!themeToggleDragging) {
+    if (THEME_TOGGLE_FINE_POINTER) return;
+    if (Math.abs(dx) < THEME_TOGGLE_MOVE_PX && Math.abs(dy) < THEME_TOGGLE_MOVE_PX) return;
+    clearThemeToggleHoldTimer();
+    beginThemeToggleDrag(event.pointerId);
+  }
+
+  if (!themeToggleDragging) return;
+
+  themeToggleWasMoved = true;
+  applyThemeTogglePosition(themeToggleOriginLeft + dx, themeToggleOriginTop + dy);
+}
+
+function onThemeTogglePointerUp(event) {
+  themeTogglePressed = false;
+  clearThemeToggleHoldTimer();
+
+  if (themeToggleDragging) {
+    if (themeTogglePointerId === event.pointerId) {
+      try {
+        themeToggle.releasePointerCapture(event.pointerId);
+      } catch {
+        /* noop */
+      }
+    }
+    saveThemeTogglePosition();
+    resetThemeToggleDragState();
+    window.setTimeout(() => { themeToggleWasMoved = false; }, 50);
+    return;
+  }
+
+  themeToggle.classList.remove("is-holding");
+  setTheme(document.body.classList.contains("dark-mode") ? "light" : "dark");
+}
+
+function setupThemeToggleDrag() {
+  restoreThemeTogglePosition();
+
+  themeToggle.addEventListener("pointerdown", onThemeTogglePointerDown);
+  themeToggle.addEventListener("pointermove", onThemeTogglePointerMove);
+  themeToggle.addEventListener("pointerup", onThemeTogglePointerUp);
+  themeToggle.addEventListener("pointercancel", onThemeTogglePointerUp);
+
+  themeToggle.addEventListener("click", (event) => {
+    if (themeToggleWasMoved) {
+      event.preventDefault();
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    if (!themeToggle.classList.contains("is-positioned")) return;
+    const left = parseFloat(themeToggle.style.left);
+    const top = parseFloat(themeToggle.style.top);
+    if (!Number.isFinite(left) || !Number.isFinite(top)) return;
+    const next = applyThemeTogglePosition(left, top);
+    saveThemeTogglePosition();
+  }, { passive: true });
+}
+
 // ==========================================
 // 5. KHỞI TẠO
 // ==========================================
@@ -645,6 +820,8 @@ preloadBackgrounds();
 setTheme(localStorage.getItem("portfolio-theme") || "dark");
 updateLayoutMetrics();
 primeCarousel();
+setupCardInnerTouchScroll();
+setupThemeToggleDrag();
 
 track.addEventListener("transitionend", onCardTransitionEnd, true);
 
@@ -654,16 +831,11 @@ document.addEventListener("keydown", onKeyDown);
 shell.addEventListener("pointerdown", (event) => {
   if (event.button !== 0) return;
   startDrag(event.clientX, event.clientY);
-  setupCardInnerTouchScroll();
 });
 
 window.addEventListener("pointermove", onPointerMove, { passive: true });
 window.addEventListener("pointerup", endDrag, { passive: true });
 window.addEventListener("pointercancel", endDrag, { passive: true });
-
-themeToggle.addEventListener("click", () => {
-  setTheme(document.body.classList.contains("dark-mode") ? "light" : "dark");
-});
 
 if (typeof ResizeObserver !== "undefined") {
   const headerObserver = new ResizeObserver((entries) => {

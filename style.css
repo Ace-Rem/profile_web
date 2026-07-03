@@ -468,9 +468,31 @@ button {
 .primary-button:hover,
 .small-link:hover,
 .action-button:hover,
-.copy-button:hover,
-.theme-toggle:hover {
+.copy-button:hover {
   transform: translateY(-2px);
+}
+
+.theme-toggle:not(.is-positioned):not(.is-dragging):not(.is-holding):hover {
+  transform: translateY(-2px);
+}
+
+.theme-toggle.is-positioned:not(.is-dragging):not(.is-holding):hover {
+  transform: none;
+  box-shadow: 0 22px 52px rgba(31, 42, 68, 0.16);
+}
+
+.theme-toggle.is-dragging,
+.theme-toggle.is-dragging:hover {
+  cursor: grabbing;
+  transform: none;
+  transition: none;
+  touch-action: none;
+  z-index: 40;
+}
+
+.theme-toggle.is-holding {
+  transform: scale(0.96);
+  transition: transform 120ms ease;
 }
 
 .compact-grid {
@@ -886,7 +908,8 @@ button {
   color: var(--text);
   background: var(--surface-strong);
   box-shadow: var(--shadow);
-  cursor: pointer;
+  cursor: grab;
+  touch-action: none;
   transition: transform var(--transition), background-color var(--transition), color var(--transition), border-color var(--transition), box-shadow var(--transition);
 }
 
@@ -1050,7 +1073,7 @@ html.is-page-changing :where(
     touch-action: pan-y;
     overscroll-behavior-y: auto;
   }
-  
+
   .carousel-shell {
     touch-action: manipulation;
   }
