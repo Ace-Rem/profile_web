@@ -75,8 +75,8 @@ const portfolioData = {
   },
   pages: [
     { id: "intro", title: "Giới thiệu", color: "#4B5694", bgImage: "./image/anh1.webp" },
-    { id: "projects", title: "Dự án", color: "#DB1A1A", bgImage: "./image/anh2.webp" },
-    { id: "profile", title: "Hồ sơ", color: "#FF9D23", bgImage: "./image/anh3.webp" },
+    { id: "projects", title: "Dự án", color: "#ce2525", bgImage: "./image/anh2.webp" },
+    { id: "profile", title: "Hồ sơ", color: "#ff9a1f", bgImage: "./image/anh3.webp" },
     { id: "contact", title: "Liên hệ", color: "#48A111", bgImage: "./image/anh4.webp" }
   ]
 };
