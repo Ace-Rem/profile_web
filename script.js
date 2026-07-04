@@ -124,6 +124,7 @@ let dragCurrentX = 0;
 let dragStartY = 0;
 let dragPending = false;
 let dragAxis = null;
+let isDragging = false;
 let wasDragged = false;
 let tooltipTimer = 0;
 let layoutRafId = 0;
@@ -322,15 +323,18 @@ function describeArc(startAngle, endAngle) {
   ].join(" ");
 }
 
-function applyLayoutMetrics(headerBottom) {
-  const headerOffset = Math.ceil(headerBottom + 20);
-  const availableHeight = Math.max(window.innerHeight - headerOffset, 360);
-  root.style.setProperty("--header-offset", headerOffset + "px");
-  root.style.setProperty("--available-height", availableHeight + "px");
+function measureVisibleHeaderOffset() {
+  if (siteHeader.classList.contains("is-hidden")) return null;
+  return Math.ceil(siteHeader.getBoundingClientRect().bottom + 20);
+}
+
+function applyHeaderOffset(offsetPx) {
+  root.style.setProperty("--header-offset", offsetPx + "px");
 }
 
 function updateLayoutMetrics() {
-  applyLayoutMetrics(siteHeader.getBoundingClientRect().bottom);
+  const measured = measureVisibleHeaderOffset();
+  if (measured !== null) applyHeaderOffset(measured);
 }
 
 function scheduleLayoutMetrics() {
@@ -421,6 +425,8 @@ function commitActivePage(newIndex) {
     if (cardPosCache[i] === posKey) continue;
     cardPosCache[i] = posKey;
     pageCards[i].dataset.pos = posKey;
+    const inner = pageCards[i].querySelector(".card-inner");
+    if (inner) inner.scrollTop = 0;
     updatedCards += 1;
   }
 
@@ -488,74 +494,172 @@ async function copyValue(value, label) {
   tooltipTimer = window.setTimeout(() => copyTooltip.classList.remove("visible"), 1500);
 }
 
-  const AXIS_LOCK_PX = 10;
-  const CAROUSEL_DRAG_PX = 55;
-  const CAROUSEL_TAP_DRAG_PX = 10;
-  const SCROLL_EDGE_EPS = 2;
-  const COARSE_POINTER = window.matchMedia("(pointer: coarse)").matches;
+const AXIS_LOCK_PX = 10;
+const CAROUSEL_DRAG_PX = 55;
+const CAROUSEL_TAP_DRAG_PX = 10;
 
-  function cardInnerCanScrollY(inner, deltaY) {
+function getActiveCardInner() {
+  return track.querySelector(".page-card[data-pos='0'] .card-inner");
+}
+
+// ==========================================
+// SCROLL COORDINATOR — body / card-inner / header
+// ==========================================
+const ScrollCoordinator = {
+  SCROLL_EDGE_EPS: 2,
+  HEADER_SCROLL_DELTA: 6,
+  HEADER_TOP_EPS: 8,
+
+  lastBodyScrollY: 0,
+  bodyScrollRafId: 0,
+  bodyLocked: false,
+  gesture: null,
+
+  init() {
+    this.lastBodyScrollY = window.scrollY;
+    window.addEventListener("scroll", this.onBodyScroll.bind(this), { passive: true });
+    document.addEventListener("pointerdown", this.onPointerDown.bind(this), { passive: true, capture: true });
+    document.addEventListener("pointermove", this.onPointerMove.bind(this), { passive: true, capture: true });
+    document.addEventListener("pointerup", this.onPointerUp.bind(this), { passive: true, capture: true });
+    document.addEventListener("pointercancel", this.onPointerUp.bind(this), { passive: true, capture: true });
+  },
+
+  isPointInside(clientX, clientY, element) {
+    const rect = element.getBoundingClientRect();
+    return clientX >= rect.left && clientX <= rect.right
+      && clientY >= rect.top && clientY <= rect.bottom;
+  },
+
+  getScrollMetrics(inner) {
     const maxScroll = inner.scrollHeight - inner.clientHeight;
-    if (maxScroll <= SCROLL_EDGE_EPS) return false;
-    if (deltaY > 0) return inner.scrollTop > SCROLL_EDGE_EPS;
-    if (deltaY < 0) return inner.scrollTop < maxScroll - SCROLL_EDGE_EPS;
+    const scrollable = maxScroll > this.SCROLL_EDGE_EPS;
+    const atTop = inner.scrollTop <= this.SCROLL_EDGE_EPS;
+    const atBottom = inner.scrollTop >= maxScroll - this.SCROLL_EDGE_EPS;
+    return { scrollable, atTop, atBottom };
+  },
+
+  innerCanConsume(inner, deltaY) {
+    const { scrollable, atTop, atBottom } = this.getScrollMetrics(inner);
+    if (!scrollable) return false;
+    if (deltaY > 0) return !atTop;
+    if (deltaY < 0) return !atBottom;
     return false;
-  }
+  },
 
-  let activeCardInnerTouch = null;
-  let activeTouchState = null;
+  lockBody() {
+    if (this.bodyLocked) return;
+    this.bodyLocked = true;
+    root.classList.add("is-inner-scrolling");
+  },
 
-  function resetCardInnerTouch() {
-    activeCardInnerTouch = null;
-    activeTouchState = null;
-  }
+  unlockBody() {
+    if (!this.bodyLocked) return;
+    this.bodyLocked = false;
+    root.classList.remove("is-inner-scrolling");
+  },
 
-  function setupCardInnerTouchScroll() {
-    track.addEventListener("touchstart", (event) => {
-      const inner = event.target.closest(".card-inner");
-      if (!inner || inner.closest(".page-card")?.dataset.pos !== "0" || event.touches.length !== 1) {
-        resetCardInnerTouch();
+  setHeaderHidden(hidden) {
+    if (siteHeader.classList.contains("is-hidden") === hidden) return;
+    siteHeader.classList.toggle("is-hidden", hidden);
+    root.classList.toggle("is-header-hidden", hidden);
+  },
+
+  onBodyScroll() {
+    if (this.bodyScrollRafId) return;
+    this.bodyScrollRafId = requestAnimationFrame(() => {
+      this.bodyScrollRafId = 0;
+      const currentY = window.scrollY;
+      const delta = currentY - this.lastBodyScrollY;
+
+      if (currentY <= this.HEADER_TOP_EPS) {
+        this.setHeaderHidden(false);
+      } else if (delta > this.HEADER_SCROLL_DELTA) {
+        this.setHeaderHidden(true);
+      } else if (delta < -this.HEADER_SCROLL_DELTA) {
+        this.setHeaderHidden(false);
+      }
+
+      this.lastBodyScrollY = currentY;
+    });
+  },
+
+  onPointerDown(event) {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+
+    const inner = getActiveCardInner();
+    if (!inner || !this.isPointInside(event.clientX, event.clientY, inner)) {
+      this.gesture = null;
+      return;
+    }
+
+    this.gesture = {
+      inner,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      lastY: event.clientY,
+      axis: null
+    };
+  },
+
+  onPointerMove(event) {
+    if (!this.gesture || event.pointerId !== this.gesture.pointerId) return;
+
+    const g = this.gesture;
+    const totalDx = event.clientX - g.startX;
+    const totalDy = event.clientY - g.startY;
+
+    if (!g.axis) {
+      if (Math.abs(totalDx) < AXIS_LOCK_PX && Math.abs(totalDy) < AXIS_LOCK_PX) return;
+      g.axis = Math.abs(totalDx) > Math.abs(totalDy) ? "x" : "y";
+      if (g.axis === "x") {
+        this.unlockBody();
+        this.gesture = null;
         return;
       }
-      activeCardInnerTouch = inner;
-      activeTouchState = {
-        startY: event.touches[0].clientY,
-        startX: event.touches[0].clientX,
-        axis: null
-      };
-    }, { passive: true });
+    }
 
-    track.addEventListener("touchmove", (event) => {
-      if (!COARSE_POINTER || !activeCardInnerTouch || !activeTouchState || event.touches.length !== 1) return;
-      const touch = event.touches[0];
-      const dy = touch.clientY - activeTouchState.startY;
-      const dx = touch.clientX - activeTouchState.startX;
-      if (!activeTouchState.axis) {
-        if (Math.abs(dx) < AXIS_LOCK_PX && Math.abs(dy) < AXIS_LOCK_PX) return;
-        activeTouchState.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
-      }
+    if (g.axis !== "y") return;
 
-      if (activeTouchState.axis === "x") return;
-      if (cardInnerCanScrollY(activeCardInnerTouch, dy)) {
-        event.preventDefault();
-      }
-    }, { passive: false });
-    track.addEventListener("touchend", resetCardInnerTouch, { passive: true });
-    track.addEventListener("touchcancel", resetCardInnerTouch, { passive: true });
+    const frameDy = event.clientY - g.lastY;
+    g.lastY = event.clientY;
+
+    if (frameDy === 0) return;
+
+    if (this.innerCanConsume(g.inner, frameDy)) {
+      this.lockBody();
+    } else {
+      this.unlockBody();
+    }
+  },
+
+  onPointerUp(event) {
+    if (!this.gesture || event.pointerId !== this.gesture.pointerId) return;
+    this.unlockBody();
+    this.gesture = null;
+  },
+
+  isVerticalGestureActive() {
+    return this.gesture?.axis === "y";
   }
+};
 
-  function startDrag(clientX, clientY) {
-    dragPending = true;
-    isDragging = false;
-    wasDragged = false;
-    dragAxis = null;
-    dragStartX = clientX;
-    dragStartY = clientY;
-    dragCurrentX = clientX;
+function startDrag(clientX, clientY) {
+  dragPending = true;
+  isDragging = false;
+  wasDragged = false;
+  dragAxis = null;
+  dragStartX = clientX;
+  dragStartY = clientY;
+  dragCurrentX = clientX;
 }
 
 function onPointerMove(event) {
   if (!dragPending && !isDragging) return;
+  if (ScrollCoordinator.isVerticalGestureActive()) {
+    dragPending = false;
+    return;
+  }
   const dx = event.clientX - dragStartX;
   const dy = event.clientY - dragStartY;
   if (dragPending && !dragAxis) {
@@ -820,7 +924,7 @@ preloadBackgrounds();
 setTheme(localStorage.getItem("portfolio-theme") || "dark");
 updateLayoutMetrics();
 primeCarousel();
-setupCardInnerTouchScroll();
+ScrollCoordinator.init();
 setupThemeToggleDrag();
 
 track.addEventListener("transitionend", onCardTransitionEnd, true);
