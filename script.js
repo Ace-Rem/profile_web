@@ -140,7 +140,7 @@ let circleSegments;
 let bgLayers;
 
 // ==========================================
-// 3. RENDER FUNCTIONS
+// 3. RENDER FUNCTIONS 
 // ==========================================
 function renderHeader() {
   logoContainer.innerHTML = `
